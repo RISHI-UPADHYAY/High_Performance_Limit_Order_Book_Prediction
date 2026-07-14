@@ -1,0 +1,57 @@
+# Virtual Environment
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Pytest
+.pytest_cache/
+
+# MyPy
+.mypy_cache/
+
+# Ruff
+.ruff_cache/
+
+# Coverage
+.coverage
+htmlcov/
+
+# MLflow
+mlruns/
+
+# Logs
+*.log
+
+# Environment Variables
+.env
+
+# Dataset
+datasets/
+
+# Model Outputs
+outputs/
+models/
+checkpoints/
+
+# Temporary Files
+*.tmp
