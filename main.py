@@ -1,6 +1,7 @@
 from src.data.dataset_loader import FI2010Parser
 from src.data.feature_extractor import FeatureExtractor
 from src.data.label_extractor import LabelExtractor
+from src.data.sliding_window import SlidingWindowGenerator
 
 def main():
 
@@ -12,16 +13,20 @@ def main():
 
     y = LabelExtractor.extract(df, horizon="10")
 
+    window_generator = SlidingWindowGenerator(window_size=100)
+
+    windows, labels = window_generator.generate(X, y)
+
     print("\n============= Dataset Summary=========\n")
 
-    print(f"Feature Matrix Shape: {X.shape}")
+    print(f"Feature Matrix Shape: {X.shape}\n")
     print(f"Label Vector Shape: {y.shape}")
 
-    print("\nFirst Five Labels")
-    print(y.head())
+    print("\nSliding Window Shape:")
 
-    print("\nLabel Distribution:")
-    print(y.value_counts().sort_index())
+    print(windows.shape)
+    print(labels.shape)
+    
 
     print("\n=========================\n")
 
