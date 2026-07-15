@@ -2,6 +2,8 @@ from src.data.dataset_loader import FI2010Parser
 from src.data.feature_extractor import FeatureExtractor
 from src.data.label_extractor import LabelExtractor
 from src.data.sliding_window import SlidingWindowGenerator
+from src.data.pytorch_dataset import LOBDataset
+from torch.utils.data import DataLoader
 
 def main():
 
@@ -17,15 +19,19 @@ def main():
 
     windows, labels = window_generator.generate(X, y)
 
-    print("\n============= Dataset Summary=========\n")
+    dataset = LOBDataset(windows, labels)
 
-    print(f"Feature Matrix Shape: {X.shape}\n")
-    print(f"Label Vector Shape: {y.shape}")
+    loader = DataLoader(dataset, batch_size=64, shuffle=True)
 
-    print("\nSliding Window Shape:")
+    print("\nDataset Size:")
+    print(len(dataset))
+    print("\nNumber of Batches:")
+    print(len(loader))
+    batch_x, batch_y = next(iter(loader))
 
-    print(windows.shape)
-    print(labels.shape)
+    print("\nBatch Shapes")
+    print(batch_x.shape)
+    print(batch_y.shape)
     
 
     print("\n=========================\n")
