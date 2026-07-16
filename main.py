@@ -4,6 +4,7 @@ from src.data.label_extractor import LabelExtractor
 from src.data.sliding_window import SlidingWindowGenerator
 from src.data.pytorch_dataset import LOBDataset
 from torch.utils.data import DataLoader
+from src.data.dataset_splitter import DatasetSplitter
 
 def main():
 
@@ -19,20 +20,19 @@ def main():
 
     windows, labels = window_generator.generate(X, y)
 
-    dataset = LOBDataset(windows, labels)
+    (X_train, y_train, X_val, y_val, X_test, y_test) = DatasetSplitter.split(windows, labels)
 
-    loader = DataLoader(dataset, batch_size=64, shuffle=True)
+    train_dataset = LOBDataset(X_train, y_train)
+    val_dataset = LOBDataset(X_val, y_val)
+    test_dataset = LOBDataset(X_test, y_test)
 
-    print("\nDataset Size:")
-    print(len(dataset))
-    print("\nNumber of Batches:")
-    print(len(loader))
-    batch_x, batch_y = next(iter(loader))
+    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=False)
+    val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False)
+    test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
 
-    print("\nBatch Shapes")
-    print(batch_x.shape)
-    print(batch_y.shape)
-    
+    print("\nTrain batches: ", len(train_loader))
+    print("Validation batches: ", len(val_loader))
+    print("Test Batches: ", len(test_loader))
 
     print("\n=========================\n")
 
