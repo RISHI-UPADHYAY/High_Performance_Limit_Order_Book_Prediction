@@ -1,9 +1,10 @@
 from __future__ import annotations
+from src.config import settings
 
 class DatasetSplitter:
 
     @staticmethod
-    def split(X, y, train_ratio=0.70, val_ratio=0.15):
+    def split(X, y, train_ratio=settings.TRAIN_RATIO, val_ratio=settings.VALIDATION_RATIO):
         n = len(X)
 
         train_end = int(n * train_ratio)
