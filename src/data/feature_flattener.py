@@ -1,4 +1,4 @@
-class FeatureFlatenner:
+class FeatureFlattener:
 
     @staticmethod
     def flatten(X):
