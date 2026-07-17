@@ -1,5 +1,3 @@
-from torch.utils.data import DataLoader
-
 from src.config import settings
 
 from src.data.dataset_loader import FI2010Parser
@@ -7,10 +5,20 @@ from src.data.feature_extractor import FeatureExtractor
 from src.data.label_extractor import LabelExtractor
 from src.data.sliding_window import SlidingWindowGenerator
 from src.data.dataset_splitter import DatasetSplitter
-from src.data.pytorch_dataset import LOBDataset
+
+from src.data.feature_flattener import FeatureFlattener
+from src.data.feature_scaler import FeatureScaler
+
+from src.models.logistic_regression import LogisticRegressionModel
+
+from src.training.evaluation import Evaluator
 
 
 def main():
+
+    print("=" * 60)
+    print("High-Performance Limit Order Book Prediction Platform")
+    print("=" * 60)
 
     parser = FI2010Parser(settings.DATA_DIR / "FI2010")
 
@@ -24,13 +32,10 @@ def main():
     )
 
     window_generator = SlidingWindowGenerator(
-        window_size=settings.WINDOW_SIZE
+        window_size=settings.WINDOW_SIZE,
     )
 
-    windows, labels = window_generator.generate(
-        X,
-        y,
-    )
+    windows, labels = window_generator.generate(X, y)
 
     (
         X_train,
@@ -42,61 +47,61 @@ def main():
     ) = DatasetSplitter.split(
         windows,
         labels,
-        train_ratio=settings.TRAIN_RATIO,
-        val_ratio=settings.VALIDATION_RATIO,
     )
 
-    train_dataset = LOBDataset(
+    print("\nFlattening windows...")
+
+    flattener = FeatureFlattener()
+
+    X_train = flattener.flatten(X_train)
+    X_val = flattener.flatten(X_val)
+    X_test = flattener.flatten(X_test)
+
+    print(X_train.shape)
+    print(X_val.shape)
+    print(X_test.shape)
+
+    print("\nScaling features...")
+
+    scaler = FeatureScaler()
+
+    X_train = scaler.fit_transform(X_train)
+
+    X_val = scaler.transform(X_val)
+
+    X_test = scaler.transform(X_test)
+
+    print("\nTraining Logistic Regression...")
+
+    model = LogisticRegressionModel()
+
+    model.fit(
         X_train,
-        y_train,
+        y_train - 1,
     )
 
-    val_dataset = LOBDataset(
-        X_val,
-        y_val,
+    print("\nPredicting...")
+
+    predictions = model.predict(X_test)
+
+    accuracy, matrix, report = Evaluator.evaluate(
+        y_test - 1,
+        predictions,
     )
 
-    test_dataset = LOBDataset(
-        X_test,
-        y_test,
-    )
+    print("\n================ RESULTS ================")
 
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=settings.BATCH_SIZE,
-        shuffle=False,
-    )
+    print(f"\nAccuracy : {accuracy:.4f}")
 
-    val_loader = DataLoader(
-        val_dataset,
-        batch_size=settings.BATCH_SIZE,
-        shuffle=False,
-    )
+    print("\nConfusion Matrix")
 
-    test_loader = DataLoader(
-        test_dataset,
-        batch_size=settings.BATCH_SIZE,
-        shuffle=False,
-    )
+    print(matrix)
 
-    print("\n========== CONFIG ==========")
+    print("\nClassification Report")
 
-    print(f"Window Size : {settings.WINDOW_SIZE}")
-    print(f"Batch Size  : {settings.BATCH_SIZE}")
-    print(f"Epochs      : {settings.EPOCHS}")
-    print(f"Device      : {settings.DEVICE}")
+    print(report)
 
-    print("\n======= DATA SUMMARY =======")
-
-    print(f"Train Samples      : {len(train_dataset)}")
-    print(f"Validation Samples : {len(val_dataset)}")
-    print(f"Test Samples       : {len(test_dataset)}")
-
-    print(f"\nTrain Batches      : {len(train_loader)}")
-    print(f"Validation Batches : {len(val_loader)}")
-    print(f"Test Batches       : {len(test_loader)}")
-
-    print("\n============================\n")
+    print("=" * 60)
 
 
 if __name__ == "__main__":
