@@ -20,9 +20,11 @@ class Trainer:
         correct = 0
         total = 0
 
-        for X, y in loader:
+        for X, y in tqdm(loader, desc="Training"):
             X = X.to(self.device)
             y = y.to(self.device)
+
+            X = X.unsqueeze(1)
 
             self.optimizer.zero_grad()
 
@@ -55,9 +57,11 @@ class Trainer:
         correct = 0
         total = 0
 
-        for X, y in loader:
+        for X, y in tqdm(loader, desc="Validation"):
             X = X.to(self.device)
             y = y.to(self.device)
+
+            X = X.unsqueeze(1)
 
             logits = self.model(X)
 

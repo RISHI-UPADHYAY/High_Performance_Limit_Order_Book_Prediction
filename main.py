@@ -1,4 +1,4 @@
-from src.config import settings
+from config import config
 
 from src.data.dataset_loader import FI2010Parser
 from src.data.feature_extractor import FeatureExtractor
@@ -20,7 +20,7 @@ def main():
     print("High-Performance Limit Order Book Prediction Platform")
     print("=" * 60)
 
-    parser = FI2010Parser(settings.DATA_DIR / "FI2010")
+    parser = FI2010Parser(config.DATA_DIR / "FI2010")
 
     df = parser.load("Train_Dst_NoAuction_DecPre_CF_7.txt")
 
@@ -32,7 +32,7 @@ def main():
     )
 
     window_generator = SlidingWindowGenerator(
-        window_size=settings.WINDOW_SIZE,
+        window_size=config.WINDOW_SIZE,
     )
 
     windows, labels = window_generator.generate(X, y)
