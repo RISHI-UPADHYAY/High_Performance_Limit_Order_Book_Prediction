@@ -5,6 +5,7 @@ from src.training.metrics import AverageMeter
 from src.training.checkpoint import save_checkpoint
 from src.training.logger import CSVLogger
 from src.training.tensorboard_logger import TensorBoardLogger
+from src.training.history import TrainingHistory
 
 class Trainer:
 
@@ -83,10 +84,19 @@ class Trainer:
     def fit(self, train_loader, val_loader, epochs, scheduler=None, early_stopping=None):
         best_loss = float("inf")
 
+        history = TrainingHistory()
+
         for epoch in range(epochs):
             train_loss, train_acc = self.train_epoch(train_loader)
 
             val_loss, val_acc = self.validate(val_loader)
+
+            history.update(
+                train_loss,
+                train_acc,
+                val_acc,
+                val_loss,
+            )
 
             print(f"Epoch {epoch+1} / {epochs}")
 
@@ -126,4 +136,6 @@ class Trainer:
                     print("Early stopping")
                     break
         self.tb.close()
+        history.save_json("logs/history.json")
+        history.save_csv("logs/history.csv")
                 
