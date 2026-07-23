@@ -7,6 +7,9 @@ class LOBDataset(Dataset):
 
     def __init__(self, X, y):
         self.X = torch.tensor(X, dtype=torch.float32)
+
+        if self.X.ndim == 3:
+            self.X = self.X.unsqueeze(1)
         
         self.y = torch.tensor(y-1, dtype=torch.long)
 
