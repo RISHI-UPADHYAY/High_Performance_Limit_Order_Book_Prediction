@@ -3,6 +3,8 @@ from tqdm import tqdm
 
 from src.training.metrics import AverageMeter
 from src.training.checkpoint import save_checkpoint
+from src.training.logger import CSVLogger
+from src.training.tensorboard_logger import TensorBoardLogger
 
 class Trainer:
 
@@ -11,6 +13,8 @@ class Trainer:
         self.optimizer = optimizer
         self.criterion = criterion
         self.device = device
+        self.logger = CSVLogger("logs/metrics.py")
+        self.tb = TensorBoardLogger()
 
     def train_epoch(self, loader):
         self.model.train()
@@ -23,8 +27,6 @@ class Trainer:
         for X, y in tqdm(loader, desc="Training"):
             X = X.to(self.device)
             y = y.to(self.device)
-
-            X = X.unsqueeze(1)
 
             self.optimizer.zero_grad()
 
@@ -61,7 +63,6 @@ class Trainer:
             X = X.to(self.device)
             y = y.to(self.device)
 
-            X = X.unsqueeze(1)
 
             logits = self.model(X)
 
@@ -91,6 +92,22 @@ class Trainer:
 
             print(f"Train Loss: {train_loss: 4f}" f" | Val Acc: {val_acc: 4f}")
 
+            self.logger.log(
+                epoch+1,
+                train_loss,
+                train_acc,
+                val_loss,
+                val_acc,
+            )
+
+            self.tb.log_scalars(
+                epoch+1,
+                train_loss,
+                train_acc,
+                val_loss,
+                val_acc,
+            )
+
             if scheduler:
                 scheduler.step(val_loss)
 
@@ -108,4 +125,5 @@ class Trainer:
                 if early_stopping.step(val_loss):
                     print("Early stopping")
                     break
+        self.tb.close()
                 
